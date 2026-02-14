@@ -8,9 +8,6 @@
 #include <sys/types.h>
 
 void die(char *message) {
-    if (errno == 13) { // permission denied
-        return; // ignore
-    }
     fprintf(stderr, "%s: %s\n", message, strerror(errno));
     exit(errno);
 }
@@ -21,7 +18,10 @@ void handle_dir(char *path, char *search_for) {
     if (pid > 0) goto wait;
     // child:
     DIR* dir = opendir(path);
-    if (!dir) die("opendir");
+    if (!dir) {
+        if (errno != 13) die("opendir");
+        exit(errno);
+    }
     struct dirent *ent;
     while((ent = readdir(dir)) != NULL) {
         if (strcmp(ent->d_name, ".") == 0) {
