@@ -8,6 +8,9 @@
 #include <sys/types.h>
 
 void die(char *message) {
+    if (errno == 13) { // permission denied
+        return; // ignore
+    }
     fprintf(stderr, "%s: %s\n", message, strerror(errno));
     exit(errno);
 }
